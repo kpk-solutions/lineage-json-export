@@ -1,9 +1,10 @@
+import json
 import pandas as pd
 from collections import defaultdict, deque
 
 # Step 1: Input DataFrame
 data = {
-    'group_level': [-4, -3, -1, 3, 4, 5],
+    'grouped_level': [-4, -3, -1, 3, 4, 5],
     'jobname': ['Pred03', 'Pred04', 'Abc01', 'Abc01', 'Sucr01', 'Sucr02'],
     'relatedpredjobs': [
         'Pred02,Pred10,Pred11',
@@ -26,7 +27,7 @@ desc_graph = defaultdict(list)
 for _, row in df.iterrows():
     job = row['jobname']
     for related in row['relatedpredjobs']:
-        if row['group_level'] < 0:
+        if row['grouped_level'] < 0:
             # related is ascendant (predecessor)
             asc_graph[job].append(related)
             desc_graph[related].append(job)
@@ -74,13 +75,12 @@ def build_lineage(root):
         'nodes': sorted(visited.values(), key=lambda x: x['level'])
     }
 
-# Step 5: Run the lineage builder
-root_job = 'Abc01'
-output = build_lineage(root_job)
+def full_lineage(root_job):
+    # root_job = 'Abc01'
+    lineage = build_lineage(root_job)
+    # lineage = json.dumps(lineage)
+    return lineage
 
-# Step 6: Print result
-from pprint import pprint
-pprint(output)
 
 """
 {
