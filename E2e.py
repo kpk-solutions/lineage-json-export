@@ -70,3 +70,24 @@ final_output = {
 # Step 4: Print result
 from pprint import pprint
 pprint(final_output)
+
+
+"""
+#!/bin/bash
+
+# Check if the mandatory argument is provided
+if [ -z "$1" ]; then
+  echo "Usage: ./run.sh <mandatory> [optional]"
+  exit 1
+fi
+
+MANDATORY_ARG="$1"
+OPTIONAL_ARG="$2"
+
+# Call the Python script with the provided arguments
+if [ -z "$OPTIONAL_ARG" ]; then
+  python3 your_script.py "$MANDATORY_ARG"
+else
+  python3 your_script.py "$MANDATORY_ARG" --optional "$OPTIONAL_ARG"
+fi
+"""
