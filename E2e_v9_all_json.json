@@ -1,0 +1,106 @@
+{
+  "root": "Abc01",
+  "nodes": [
+    {
+      "id": "Pred02",
+      "level": -3,
+      "ascendants": [],
+      "descendants": [
+        "Pred03"
+      ]
+    },
+    {
+      "id": "Pred10",
+      "level": -3,
+      "ascendants": [],
+      "descendants": [
+        "Pred03"
+      ]
+    },
+    {
+      "id": "Pred11",
+      "level": -3,
+      "ascendants": [],
+      "descendants": [
+        "Pred03"
+      ]
+    },
+    {
+      "id": "Pred03",
+      "level": -2,
+      "ascendants": [
+        "Pred02",
+        "Pred10",
+        "Pred11"
+      ],
+      "descendants": [
+        "Pred04"
+      ]
+    },
+    {
+      "id": "Pred13",
+      "level": -2,
+      "ascendants": [],
+      "descendants": [
+        "Pred04"
+      ]
+    },
+    {
+      "id": "Pred14",
+      "level": -2,
+      "ascendants": [],
+      "descendants": [
+        "Pred04"
+      ]
+    },
+    {
+      "id": "Pred04",
+      "level": -1,
+      "ascendants": [
+        "Pred03",
+        "Pred13",
+        "Pred14"
+      ],
+      "descendants": [
+        "Abc01"
+      ]
+    },
+    {
+      "id": "Pred15",
+      "level": -1,
+      "ascendants": [],
+      "descendants": [
+        "Abc01"
+      ]
+    },
+    {
+      "id": "Pred16",
+      "level": -1,
+      "ascendants": [],
+      "descendants": [
+        "Abc01"
+      ]
+    },
+    {
+      "id": "Abc01",
+      "level": 0,
+      "ascendants": [
+        "Pred04",
+        "Pred15",
+        "Pred16"
+      ],
+      "descendants": [
+        "Sucr01"
+      ]
+    },
+    {
+      "id": "Sucr01",
+      "level": 1,
+      "ascendants": [
+        "Abc01"
+      ],
+      "descendants": []
+    }
+  ]
+}
+

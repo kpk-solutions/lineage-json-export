@@ -1,7 +1,13 @@
 import json
+import sys
+from loguru import logger
 from fastapi import FastAPI
 from E2e_v9 import full_lineage
 from fastapi.middleware.cors import CORSMiddleware
+
+
+logger.remove()
+logger.add(sys.stdout, level="DEBUG", format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{message}</level>", colorize=True)
 
 
 app = FastAPI()
@@ -16,11 +22,12 @@ app.add_middleware(
 )
 
 
-@app.get("/lineage/")
+@app.get("/lineage/{job_name}")
 async def get_lineage(job_name: str):
+    logger.info('Calling lineage logic')
     lineage = full_lineage(job_name)
-    # print(lineage)
-    # lineage = json.dumps(lineage)
+    logger.info(f'Lineage data: {lineage}')
+    logger.info('Returning the response')
     return lineage
 
 # import sql_connection
