@@ -1,93 +1,57 @@
-from collections import defaultdict, deque
-
-# Input table data (your format)
-table_data = [
-    (-4, 'Pred03', 'Pred02'),
-    (-3, 'Pred04', 'Pred03'),
-    (-1, 'Abc01', 'Pred04'),
-    (3, 'Abc01', 'Sucr01'),
-    (4, 'Sucr01', 'Sucr02'),
-    (5, 'Sucr02', 'Sucr03')
-]
-
-# Step 1: Build maps
-asc_map = defaultdict(list)  # job -> list of predecessors
-desc_map = defaultdict(list)  # job -> list of successors
-
-for level, job, rel_job in table_data:
-    if level < 0:
-        asc_map[job].append(rel_job)
-        desc_map[rel_job].append(job)
-    else:
-        asc_map[rel_job].append(job)
-        desc_map[job].append(rel_job)
-
-# Step 2: Traverse both directions from root
-def traverse_lineage(root):
-    visited = {}
-    result = []
-
-    # Traverse backward (predecessors)
-    queue = deque([(root, 0)])
-    while queue:
-        job, level = queue.popleft()
-        if job in visited:
-            continue
-        visited[job] = level
-        for pred in asc_map.get(job, []):
-            queue.append((pred, level - 1))
-
-    # Traverse forward (successors)
-    queue = deque([(root, 0)])
-    while queue:
-        job, level = queue.popleft()
-        if job in visited and level <= visited[job]:
-            continue
-        visited[job] = level
-        for succ in desc_map.get(job, []):
-            queue.append((succ, level + 1))
-
-    # Build result
-    for job, level in visited.items():
-        result.append({
-            'id': job,
-            'level': level,
-            'asc': asc_map.get(job, []),
-            'desc': desc_map.get(job, [])
-        })
-
-    return result
-
-# Step 3: Generate final lineage dictionary
-root_job = 'Abc01'
-nodes = traverse_lineage(root_job)
-
-final_output = {
-    'root': root_job,
-    'nodes': sorted(nodes, key=lambda x: x['level'])
-}
-
-# Step 4: Print result
-from pprint import pprint
-pprint(final_output)
-
-
 """
-#!/bin/bash
+oracle_connect.py
 
-# Check if the mandatory argument is provided
-if [ -z "$1" ]; then
-  echo "Usage: ./run.sh <mandatory> [optional]"
-  exit 1
-fi
+Connects to an Oracle Database using pyodbc and Oracle Instant Client
+without requiring admin privileges.
 
-MANDATORY_ARG="$1"
-OPTIONAL_ARG="$2"
-
-# Call the Python script with the provided arguments
-if [ -z "$OPTIONAL_ARG" ]; then
-  python3 your_script.py "$MANDATORY_ARG"
-else
-  python3 your_script.py "$MANDATORY_ARG" --optional "$OPTIONAL_ARG"
-fi
+Ensure you have:
+- Downloaded and extracted Oracle Instant Client (Basic + ODBC) locally
+- Updated your user PATH to include the extracted folder
+- Checked the available ODBC drivers using pyodbc.drivers()
 """
+
+import pyodbc
+
+# Replace these values with your Oracle DB details
+HOST = 'your_host'               # e.g., '127.0.0.1' or 'mydb.example.com'
+PORT = '1521'                    # default port
+SERVICE_NAME = 'your_service'    # e.g., 'orclpdb1'
+USERNAME = 'your_user'
+PASSWORD = 'your_password'
+
+# Check available ODBC drivers (to find the correct Oracle driver name)
+print("Available ODBC Drivers:")
+print(pyodbc.drivers())
+
+# NOTE: Update the driver name if it's different in your environment
+DRIVER_NAME = 'Oracle in InstantClient'
+
+# Build the DSN-less connection string
+dsn = f"{HOST}:{PORT}/{SERVICE_NAME}"
+conn_str = (
+    f"Driver={{{DRIVER_NAME}}};"
+    f"DBQ={dsn};"
+    f"UID={USERNAME};"
+    f"PWD={PASSWORD}"
+)
+
+try:
+    # Establish the connection
+    conn = pyodbc.connect(conn_str)
+    print("Connected to Oracle Database successfully.")
+
+    # Create a cursor and execute a sample query
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM YOUR_TABLE_NAME")  # replace with your actual table
+
+    # Fetch and print results
+    for row in cursor.fetchall():
+        print(row)
+
+    # Clean up
+    cursor.close()
+    conn.close()
+
+except Exception as e:
+    print("Failed to connect or execute query:")
+    print(e)
