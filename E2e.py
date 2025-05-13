@@ -1,57 +1,52 @@
-"""
-oracle_connect.py
+import cx_Oracle
 
-Connects to an Oracle Database using pyodbc and Oracle Instant Client
-without requiring admin privileges.
+def copy_table(dev_table_name, qa_table_name, qa_user, qa_pass, qa_host, qa_service):
+    try:
+        # Connect to QA DB
+        dsn = cx_Oracle.makedsn(qa_host, 1521, service_name=qa_service)
+        conn = cx_Oracle.connect(user=qa_user, password=qa_pass, dsn=dsn)
+        cursor = conn.cursor()
 
-Ensure you have:
-- Downloaded and extracted Oracle Instant Client (Basic + ODBC) locally
-- Updated your user PATH to include the extracted folder
-- Checked the available ODBC drivers using pyodbc.drivers()
-"""
+        # Source table from DEV using DB link
+        source_table = f"{dev_table_name}@dev_link"
 
-import pyodbc
+        print(f"Fetching data from {source_table}...")
+        cursor.execute(f"SELECT * FROM {source_table}")
+        rows = cursor.fetchall()
 
-# Replace these values with your Oracle DB details
-HOST = 'your_host'               # e.g., '127.0.0.1' or 'mydb.example.com'
-PORT = '1521'                    # default port
-SERVICE_NAME = 'your_service'    # e.g., 'orclpdb1'
-USERNAME = 'your_user'
-PASSWORD = 'your_password'
+        if not rows:
+            print("No data found in source table.")
+            return
 
-# Check available ODBC drivers (to find the correct Oracle driver name)
-print("Available ODBC Drivers:")
-print(pyodbc.drivers())
+        # Get column names
+        columns = [col[0] for col in cursor.description]
+        col_str = ', '.join(columns)
+        placeholders = ', '.join([f":{i+1}" for i in range(len(columns))])
 
-# NOTE: Update the driver name if it's different in your environment
-DRIVER_NAME = 'Oracle in InstantClient'
+        # Prepare insert query for QA table
+        insert_query = f"INSERT INTO {qa_table_name} ({col_str}) VALUES ({placeholders})"
 
-# Build the DSN-less connection string
-dsn = f"{HOST}:{PORT}/{SERVICE_NAME}"
-conn_str = (
-    f"Driver={{{DRIVER_NAME}}};"
-    f"DBQ={dsn};"
-    f"UID={USERNAME};"
-    f"PWD={PASSWORD}"
-)
+        print(f"Inserting into {qa_table_name}...")
+        cursor.executemany(insert_query, rows)
+        conn.commit()
+        print(f"Copied {len(rows)} rows from {source_table} to {qa_table_name}.")
 
-try:
-    # Establish the connection
-    conn = pyodbc.connect(conn_str)
-    print("Connected to Oracle Database successfully.")
+    except cx_Oracle.DatabaseError as e:
+        print("Database error occurred:", e)
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
-    # Create a cursor and execute a sample query
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM YOUR_TABLE_NAME")  # replace with your actual table
+if __name__ == "__main__":
+    # CONFIGURE THESE
+    DEV_TABLE = "your_dev_table_name"     # Without @dev_link
+    QA_TABLE = "your_qa_table_name"
 
-    # Fetch and print results
-    for row in cursor.fetchall():
-        print(row)
+    QA_USER = "qa_user"
+    QA_PASS = "qa_password"
+    QA_HOST = "qa_host_or_ip"             # e.g., 192.168.1.100
+    QA_SERVICE = "qa_service_name"
 
-    # Clean up
-    cursor.close()
-    conn.close()
-
-except Exception as e:
-    print("Failed to connect or execute query:")
-    print(e)
+    copy_table(DEV_TABLE, QA_TABLE, QA_USER, QA_PASS, QA_HOST, QA_SERVICE)
