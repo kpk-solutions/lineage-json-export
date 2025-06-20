@@ -1,0 +1,94 @@
+It seems like I can’t do more advanced data analysis right now. Please try again later.
+
+However, I can give you the exact content you can copy into a .txt file manually. Here it is:
+
+⸻
+
+SSO Integration in FastAPI – Migration Proposal from .NET
+
+1. Introduction
+This document outlines the proposed migration of Single Sign-On (SSO) authentication logic from the current .NET backend to a Python-based FastAPI solution. The purpose is to streamline authentication, enhance scalability, reduce dependency overhead, and maintain enterprise-grade security.
+
+2. Current System Architecture
+	•	Frontend: Angular
+	•	Backend: .NET APIs (handling authentication and API endpoints)
+	•	Business Logic: Python scripts (called via shell from .NET)
+	•	Databases: SQL Server and Google BigQuery
+	•	Authentication: SSO using Azure Active Directory (AAD) or other OIDC provider
+
+3. Problems with Current SSO Flow
+	•	Complex Flow: UI → .NET → Shell → Python is slow and fragile
+	•	Tight Coupling: Requires changes in both .NET and Python for auth
+	•	Maintenance Overhead: Two teams for .NET and Python logic
+	•	Debugging Effort: Errors need to be traced across systems
+	•	Slower Performance: Shell-based calling introduces latency
+	•	Limited Extensibility: Hard to scale for new auth logic or users
+
+4. Proposed FastAPI-Based SSO Architecture
+FastAPI Will Handle:
+	•	Authentication via SSO (OpenID Connect)
+	•	Token/session generation
+	•	User verification and role extraction
+	•	Unified access to both SQL Server and BigQuery
+
+Flow:
+Angular UI → FastAPI Login → SSO Redirect (Azure AD/Okta/etc.) → Token → Access Protected APIs
+
+5. SSO Implementation in FastAPI (Overview)
+	•	Use Authlib to implement OAuth2/OpenID Connect
+	•	Fetch tokens and parse user information (email, name, roles)
+	•	Store minimal session info or JWT token
+	•	Authorize requests based on session or token data
+
+6. Sample API Endpoints
+	•	/login: Redirects user to SSO login (Azure/Okta)
+	•	/auth: Callback after login, processes tokens
+	•	/me: Returns authenticated user details
+	•	/secure/data: Protected endpoint with access control
+
+7. Technology Stack
+	•	Backend Framework: FastAPI
+	•	SSO Integration: Authlib / MSAL (for Azure AD)
+	•	DB Access: pyodbc (SQL Server), google-cloud-bigquery
+	•	Deployment: On-prem / VM (No Docker if client restricts)
+	•	Caching / Sessions: Redis or Python-based caching (optional)
+
+8. Security Best Practices
+	•	Use HTTPS for all API endpoints
+	•	Rotate tokens periodically
+	•	Use secure cookie-based sessions
+	•	Validate issuer and audience in tokens
+	•	Store no PII or tokens in browser/localStorage
+
+9. Business Benefits
+	•	Unified Backend: FastAPI handles both business and auth logic
+	•	Cost-Effective: Removes dependency on .NET licensing/support
+	•	Scalable: Easy to add more endpoints, integrate ML, etc.
+	•	Fast: Async request handling ensures faster user login
+	•	Easy to Maintain: Single language (Python) across backend stack
+
+10. Migration Strategy
+	•	Phase 1: Implement FastAPI with mock SSO endpoints
+	•	Phase 2: Integrate Azure AD or other SSO provider
+	•	Phase 3: Replace .NET auth endpoints in staging
+	•	Phase 4: Validate session and DB access
+	•	Phase 5: Go live and monitor performance/logs
+
+11. Example User Object After Login
+12. Future Readiness
+	•	Multi-user concurrency
+	•	Easy integration with logging/monitoring tools
+	•	Flexible for ML model-based role checks or analytics
+
+13. Conclusion
+Migrating to FastAPI with native SSO integration ensures:
+	•	Improved security and maintainability
+	•	Reduced latency and complexity
+	•	Enhanced user experience
+This is a future-proof, scalable architecture aligned with cloud-first, Python-based transformation goals.
+
+    {
+  "name": "Pavan K",
+  "email": "pavan@example.com",
+  "roles": ["admin", "user"]
+}
