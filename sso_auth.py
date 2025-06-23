@@ -25,3 +25,21 @@ async def sso_authentication_middleware(request: Request, call_next):
         return JSONResponse(status_code=403, content={"detail": "Invalid or expired token"})
 
     return await call_next(request)
+
+
+
+#main.py
+from fastapi import FastAPI
+from starlette.middleware.base import BaseHTTPMiddleware
+from app.core.sso_auth import sso_authentication_middleware
+
+app = FastAPI()
+
+# Add the SSO middleware
+app.add_middleware(BaseHTTPMiddleware, dispatch=sso_authentication_middleware)
+
+# Sample protected endpoint
+@app.get("/secure-data")
+def secure_data(request: Request):
+    user = request.state.user
+    return {"message": "Secure access granted", "user": user}
